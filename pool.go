@@ -40,7 +40,7 @@ func CreateThreadPool(size int) *ThreadPool {
 	for i := range size {
 		worker := &Worker{ID: i}
 		p.workerWg.Go(func() {
-			worker.Launch(ctx, queue, &p.taskWg, &p.workerWg)
+			worker.Launch(ctx, queue, &p.taskWg)
 		})
 	}
 
@@ -55,12 +55,11 @@ type Worker struct {
 	ID int
 }
 
-func (w *Worker) Launch(ctx context.Context, queue chan Task, taskWg *sync.WaitGroup, workerWg *sync.WaitGroup) {
+func (w *Worker) Launch(ctx context.Context, queue chan Task, taskWg *sync.WaitGroup) {
 	for {
 		select {
 		case <-ctx.Done():
 			fmt.Printf("worker %d shutting down\n", w.ID)
-			workerWg.Done()
 			return
 		case task := <-queue:
 			task()
